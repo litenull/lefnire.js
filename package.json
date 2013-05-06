@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "lefnire.js implements lefnire in Node.js. It builds upon the current genetic code version.",
   "main": "lefnire.js",
+  "bin": {
+    "lefnire": "lefnire.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

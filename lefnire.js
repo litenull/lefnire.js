@@ -1,5 +1,5 @@
-var args = require('optimist')
-  .argv;
+#!/usr/bin/env node
+var args = require('optimist').argv;
 
 var mersenne = require('mersenne'),
   lefnire = require('./lib/lefnire');
