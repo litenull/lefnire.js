@@ -22,6 +22,7 @@
   "license": "GPLv3",
   "dependencies": {
     "nconf": "~0.6.7",
-    "prompt": "~0.2.9"
+    "prompt": "~0.2.9",
+    "mersenne": "0.0.3"
   }
 }
