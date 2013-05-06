@@ -6,6 +6,8 @@ var mersenne = require('mersenne'),
 
 var thisLefnire = new lefnire();
 
+thisLefnire.introduce();
+
 // TODO: Make laziness configurable
 var doSomeWork = mersenne.rand(11);
 
