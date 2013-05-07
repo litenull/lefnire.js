@@ -1,10 +1,12 @@
 args = require("optimist").argv
 mersenne = require("mersenne")
+moment = require('moment')
 lefnire = require("./lib/lefnire")
 thisLefnire = new lefnire()
 thisLefnire.introduce()
 
 # TODO: Make laziness configurable
+mersenne.seed parseInt(moment().format('X'))
 doSomeWork = mersenne.rand(11)
 if parseInt(doSomeWork) is 5
 

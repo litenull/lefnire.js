@@ -1,6 +1,6 @@
 {
-  "name": "lefnire.js",
-  "version": "0.0.0",
+  "name": "lefnire",
+  "version": "0.0.2",
   "description": "lefnire.js implements lefnire in Node.js. It builds upon the current genetic code version.",
   "main": "lefnire.js",
   "bin": {
@@ -29,6 +29,7 @@
     "mersenne": "0.0.3",
     "optimist": "~0.4.0",
     "coffee-script": "~1.6.2",
-    "irc": "~0.3.6"
+    "irc": "~0.3.6",
+    "moment": "~2.0.0"
   }
 }

@@ -3,6 +3,7 @@ irc = require("irc")
 util = require('util')
 argv = require('optimist')
 mersenne = require('mersenne')
+moment = require('moment')
 
 lefnire = ->
   @textPrefix = "lefnire says: "
@@ -49,6 +50,7 @@ lefnire::trollIrc = ->
         client.disconnect()
         process.exit()
 
+      mersenne.seed parseInt(moment().format('X'))
       saySomething = mersenne.rand 6
 
       quoteMap = {
