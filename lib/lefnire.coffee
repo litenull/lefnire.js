@@ -24,8 +24,6 @@ lefnire::memoryleaks = ->
 lefnire::buildnewfeature = ->
   "Thank god for Derby"
 
-module.exports = lefnire
-
 lefnire::trollIrc = ->
   client = new irc.Client(@defaultIrcServer, @defaultNick, {
     port: 6665,
