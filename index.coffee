@@ -14,7 +14,12 @@ if parseInt(doSomeWork) is 5
   thisLefnire.say "Sorry, I'm busy fixing Derby bugs. Maybe next time."
   console.log "Execution stopped!"
   process.exit()
-thisLefnire.say "Dunno what you want. Let me try and find you on IRC..."
+
+if argv.troll or argv.irc
+  suffix = "Let me try and find you on IRC..."
+else
+  suffix = "Shoot me a G+"
+thisLefnire.say "Dunno what you want. #{suffix}"
 
 # Initiate IRC sequence!
 thisLefnire.trollIrc() if argv.troll or argv.irc
