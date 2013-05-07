@@ -8,4 +8,7 @@ lefnire::say = (text) ->
 lefnire::introduce = ->
   console.log @asciiImage + "\n"
 
+lefnire::memoryleaks = ->
+  console.log "chasing down some memory leaks"
+
 module.exports = lefnire
