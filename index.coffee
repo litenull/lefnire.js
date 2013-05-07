@@ -1,4 +1,4 @@
-args = require("optimist").argv
+argv = require("optimist").argv
 mersenne = require("mersenne")
 moment = require('moment')
 lefnire = require("./lib/lefnire")
@@ -17,4 +17,4 @@ if parseInt(doSomeWork) is 5
 thisLefnire.say "Dunno what you want. Let me try and find you on IRC..."
 
 # Initiate IRC sequence!
-thisLefnire.trollIrc();
+thisLefnire.trollIrc() if argv.troll or argv.irc

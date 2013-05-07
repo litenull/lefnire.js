@@ -1,7 +1,7 @@
 # Because obviously lefnire is a class. And he will not be subject to class-naming conventions!
 irc = require("irc")
 util = require('util')
-argv = require('optimist')
+argv = require('optimist').argv
 mersenne = require('mersenne')
 moment = require('moment')
 
@@ -32,8 +32,15 @@ lefnire::trollIrc = ->
     channels: [@defaultChannel]
   })
 
+  disconnect = (message) =>
+    @say "Whoa, something came up! Gotta bail. Shoot me a G+ invite."
+    console.log "Quit message should be: #{message}" if argv.debug
+    client.disconnect message # Message doesn't work. But hopefully it one day will.
+    process.exit()
+
   client.addListener('error', (message) ->
-    console.log("error: #{message}") if argv.debug
+    messageDump = util.inspect(message)
+    console.log("error: #{messageDump}") if argv.debug
   )
 
   client.addListener('registered', (message) ->
@@ -41,15 +48,19 @@ lefnire::trollIrc = ->
     console.log("server said: #{messageDump}") if argv.debug
   )
 
+  client.addListener("message#{@defaultChannel}", (nick, text, message) =>
+    refListPattern = /reflist/i
+    if refListPattern.test text
+      client.say @defaultChannel, "oh man...refLists....don't even mention those! sorry guys, I need a breather"
+      disconnect("refLists...why do you hate me so...;(")
+    else
+      client.say @defaultChannel, "what about reflists?"
+  )
+
   client.addListener('join', (channel, nick, message) =>
     messageDump = util.inspect message
     console.log("#{nick} joined #{channel}. message: #{messageDump}") if argv.debug
     if (nick is @defaultNick and channel is @defaultChannel)
-      disconnect = =>
-        @say "Whoa, something came up! Gotta bail. Shoot me a G+ invite."
-        client.disconnect()
-        process.exit()
-
       mersenne.seed parseInt(moment().format('X'))
       saySomething = mersenne.rand 6
 
@@ -61,7 +72,7 @@ lefnire::trollIrc = ->
       if parseInt(saySomething) is 1 or parseInt(saySomething) is 2
         client.say @defaultChannel, quoteMap[saySomething]()
 
-      setTimeout(disconnect, 3000)
+      setTimeout(disconnect, 3000) unless argv.irc and not argv.troll # Trolling wins.
     else
       @say "...my channel-exiting code isn't working!"
   )
