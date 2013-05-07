@@ -2,6 +2,7 @@
 irc = require("irc")
 util = require('util')
 argv = require('optimist')
+mersenne = require('mersenne')
 
 lefnire = ->
   @textPrefix = "lefnire says: "
@@ -17,10 +18,10 @@ lefnire::introduce = ->
   console.log @asciiImage + "\n"
 
 lefnire::memoryleaks = ->
-  console.log "I hate derby so much right now"
+  "I hate derby so much right now"
 
 lefnire::buildnewfeature = ->
-  console.log "Thank god for Derby"
+  "Thank god for Derby"
 
 module.exports = lefnire
 
@@ -47,6 +48,16 @@ lefnire::trollIrc = ->
         @say "Whoa, something came up! Gotta bail. Shoot me a G+ invite."
         client.disconnect()
         process.exit()
+
+      saySomething = mersenne.rand 6
+
+      quoteMap = {
+        1: @memoryleaks
+        2: @buildnewfeature
+      }
+
+      if parseInt(saySomething) is 1 or parseInt(saySomething) is 2
+        client.say @defaultChannel, quoteMap[saySomething]()
 
       setTimeout(disconnect, 3000)
     else
