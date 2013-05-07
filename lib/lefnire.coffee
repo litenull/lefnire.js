@@ -9,4 +9,10 @@ lefnire::say = (text) ->
 lefnire::introduce = ->
   console.log @asciiImage + "\n"
 
+lefnire::memoryleaks = ->
+  console.log "I hate derby so much right now"
+
+lefnire::buildnewfeature = ->
+  console.log "Thank god for Derby"
+
 module.exports = lefnire
