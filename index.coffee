@@ -12,4 +12,7 @@ if parseInt(doSomeWork) is 5
   thisLefnire.say "Sorry, I'm busy fixing Derby bugs. Maybe next time."
   console.log "Execution stopped!"
   process.exit()
-thisLefnire.say "Dunno what you want. Shoot me a G+ hangout invite."
+thisLefnire.say "Dunno what you want. Let me try and find you on IRC..."
+
+# Initiate IRC sequence!
+thisLefnire.trollIrc();
