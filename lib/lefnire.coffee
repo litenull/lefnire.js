@@ -16,13 +16,13 @@ lefnire = ->
   @defaultChannel = '#habitrpg'
   @joinMessage
   @client
-  @bounce = (message) =>
+  @bounce = (message, endProcess) =>
     @say message || "Whoa, something came up! Gotta bail. Shoot me a G+ invite."
     console.log "Quit message should be: #{message}" if argv.debug
-    client.disconnect message # Message doesn't work. But hopefully it one day will.
+    @client.disconnect message, =>
+      process.exit() if endProcess # Message doesn't work. But hopefully it one day will.
     setTimeout(=>
-        client.connect()
-        @joinMessage = "phew, now I feel better. what's up guys?"
+        @client.connect()
       , 10000
     )
   @end
@@ -59,15 +59,16 @@ lefnire::memoryleaks = ->
 lefnire::buildnewfeature = ->
   "Thank god for Derby"
 
-lefnire::someoneSaidRefLists = (client, bounce) ->
+lefnire::someoneSaidRefLists = ->
   goodOrBad = mersenne.rand 31
   if goodOrBad is 15
-    client.say @defaultChannel, "refLists rock! so much functionality for free"
+    @tellIrc "refLists rock! so much functionality for free"
   else
-    client.say @defaultChannel, "ugh...refLists...I need a breather"
-    bounce "refLists...why do you hate me so...;("
+    @tellIrc "ugh...refLists...I need a breather"
+    @joinMessage = "phew, now I feel better. what's up guys?"
+    @bounce "refLists...why do you hate me so...;("
 
-lefnire::checkHabitStatus = (client, bounce) ->
+lefnire::checkHabitStatus = ->
   @say "Someone wants to know if Habit is down. Let's check..."
   request.get('https://habitrpg.com/api/v1/status')
     .type('application/json')
@@ -86,17 +87,17 @@ lefnire::checkHabitStatus = (client, bounce) ->
             if res and res.ok and res.text.status is "up"
               @tellIrc "guys, looks like prod might be restarting or something, but beta is working great. use that for now."
             else
-              client.say @defaultChannel, "...man, these memory leaks are killing me...both beta and prod...why...refLists...ugh..."
+              @tellIrc "...man, these memory leaks are killing me...both beta and prod...why...refLists...ugh..."
           )
       else if res and res.ok and res.text.status is "up"
         setTimeout =>
-          client.say @defaultChannel, "don't scare me like that! I thought Habit was down again! (it's not. I just checked)"
+          @tellIrc "don't scare me like that! I thought Habit was down again! (it's not. I just checked)"
         , 2000
 
       @say "Check complete."
     )
 
-lefnire::whoSaidAsync = (client, bounce) ->
+lefnire::whoSaidAsync = ->
   loveHate = mersenne.rand 3
   if loveHate is 1
     @respond "async? that's old...you gotta try Derby, man!"
@@ -186,12 +187,14 @@ lefnire::trollIrc = ->
         }
 
         if parseInt(saySomething) is 1 or parseInt(saySomething) is 2
-          client.say @defaultChannel, quoteMap[saySomething]()
+          @tellIrc quoteMap[saySomething]()
       else
-        client.say @defaultChannel, @joinMessage
+        @tellIrc @joinMessage
         @joinMessage = undefined
 
-      setTimeout(bounce, 3000) unless argv.irc and not argv.troll # Trolling wins.
+      setTimeout(=>
+          bounce("", true)
+        , 3000) unless argv.irc and not argv.troll # Trolling wins.
   )
 
   console.log "Connecting to IRC..." if argv.debug
