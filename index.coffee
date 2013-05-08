@@ -2,7 +2,10 @@ argv = require("optimist").argv
 mersenne = require("mersenne")
 moment = require('moment')
 lefnire = require("./lib/lefnire")
+util = require('util')
+
 thisLefnire = new lefnire()
+console.log util.inspect thisLefnire if argv.debug
 thisLefnire.introduce()
 
 # TODO: Make laziness configurable

@@ -5,6 +5,7 @@ argv = require('optimist').argv
 mersenne = require('mersenne')
 moment = require('moment')
 request = require('superagent')
+github = require('octonode')
 
 lefnire = ->
   @textPrefix = "lefnire says: "
@@ -14,6 +15,16 @@ lefnire = ->
   @defaultChannel = '#habitrpg'
   @joinMessage
   @client
+  @bounce = (message) =>
+    @say message || "Whoa, something came up! Gotta bail. Shoot me a G+ invite."
+    console.log "Quit message should be: #{message}" if argv.debug
+    client.disconnect message # Message doesn't work. But hopefully it one day will.
+    setTimeout(=>
+        client.connect()
+        @joinMessage = "phew, now I feel better. what's up guys?"
+      , 10000
+    )
+  @end
 
 lefnire::say = (text) ->
   console.log @textPrefix + text
@@ -79,6 +90,23 @@ lefnire::whoSaidAsync = (client, bounce) ->
   else
     @respond "ah, good ol' async...can't wait for the angular rewrite to be done"
 
+lefnire::countGitHubIssues = ->
+  @say "Checking GitHub issues..."
+  @tellIrc "hold up, let me check the queue..."
+  request.get('https://api.github.com/repos/lefnire/habitrpg/issues?state=open&labels=critical')
+    .set('User-Agent', 'https://github.com/litenull/lefnire.js (Node.js SuperAgent)')
+    .end((res) =>
+      @say "Got response."
+      console.log "Error? #{util.inspect(res.error)}" if argv.debug and res
+      console.log "Response? #{util.inspect(res)}" if argv.debug
+      if (res and res.ok)
+        console.log "Length of response was #{res.length}" if argv.debug
+        if (res.body.length)
+          @tellIrc "yeah, argh, still #{res.body.length} criticals :("
+        else
+          @tellIrc "no criticals...or I'm too tired to notice"
+    )
+
 lefnire::trollIrc = ->
   @client = new irc.Client(@defaultIrcServer, @defaultNick, {
     port: 6665,
@@ -88,15 +116,7 @@ lefnire::trollIrc = ->
 
   client = @client
 
-  bounce = (message) =>
-    @say message || "Whoa, something came up! Gotta bail. Shoot me a G+ invite."
-    console.log "Quit message should be: #{message}" if argv.debug
-    client.disconnect message # Message doesn't work. But hopefully it one day will.
-    setTimeout(=>
-        client.connect()
-        @joinMessage = "phew, now I feel better. what's up guys?"
-      , 10000
-    )
+  bounce = @bounce
 
   client.addListener('error', (message) ->
     console.log "error listener fired" if argv.debug
@@ -121,6 +141,11 @@ lefnire::trollIrc = ->
     else if (/async/i).test text
       @whoSaidAsync client, bounce
       return
+    else if (/.*any.*issues.*/i).test text
+      @countGitHubIssues()
+      return
+    else
+      console.log "No messages matched" if argv.debug
   )
 
   client.addListener('join', (channel, nick, message) =>

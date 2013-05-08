@@ -36,6 +36,6 @@
     "irc": "~0.3.6",
     "moment": "~2.0.0",
     "superagent": "~0.14.2",
-    "node-github": "0.0.3"
+    "octonode": "~0.3.1"
   }
 }
