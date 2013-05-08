@@ -41,9 +41,11 @@ lefnire::someoneSaidRefLists = (client, bounce) ->
     bounce "refLists...why do you hate me so...;("
 
 lefnire::checkHabitStatus = (client, bounce) ->
+  @say "Someone wants to know if Habit is down. Let's check..."
   request.get('https://habitrpg.com/api/v1/status')
     .type('application/json')
     .set('Accept: gzip, deflate')
+    .timeout(10000)
     .end((err, res) =>
           if res and res.ok
             res.text = JSON.parse(res.text)
@@ -54,6 +56,8 @@ lefnire::checkHabitStatus = (client, bounce) ->
             setTimeout =>
               client.say @defaultChannel, "don't scare me like that! I thought Habit was down again! (it's not. I just checked)"
             , 2000
+
+          @say "Check complete."
     )
 
 lefnire::whoSaidAsync = (client, bounce) ->
