@@ -46,7 +46,7 @@ lefnire::checkHabitStatus = (client, bounce) ->
             client.say @defaultChannel, "...man, these memory leaks are killing me...refLists...ugh..."
           else
             setTimeout =>
-              client.say @defaultChannel, "don't scare me like that! I thought Habit was down again!"
+              client.say @defaultChannel, "don't scare me like that! I thought Habit was down again! (it's not. I just checked)"
             , 2000
     )
 
