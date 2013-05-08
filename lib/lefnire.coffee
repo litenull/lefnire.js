@@ -13,12 +13,18 @@ lefnire = ->
   @defaultNick = 'lefnire-js'
   @defaultChannel = '#habitrpg'
   @joinMessage
+  @client
 
 lefnire::say = (text) ->
   console.log @textPrefix + text
 
 lefnire::introduce = ->
   console.log @asciiImage + "\n"
+
+lefnire::respond = (message) ->
+  setTimeout =>
+      @client.say @defaultChannel, message
+    , 1000
 
 lefnire::memoryleaks = ->
   "I hate derby so much right now"
@@ -50,12 +56,21 @@ lefnire::checkHabitStatus = (client, bounce) ->
             , 2000
     )
 
+lefnire::whoSaidAsync = (client, bounce) ->
+  loveHate = mersenne.rand 3
+  if loveHate is 1
+    @respond "async? that's old...you gotta try Derby, man!"
+  else
+    @respond "ah, good ol' async...can't wait for the angular rewrite to be done"
+
 lefnire::trollIrc = ->
-  client = new irc.Client(@defaultIrcServer, @defaultNick, {
+  @client = new irc.Client(@defaultIrcServer, @defaultNick, {
     port: 6665,
     channels: [@defaultChannel],
     autoConnect: false,
   })
+
+  client = @client
 
   bounce = (message) =>
     @say message || "Whoa, something came up! Gotta bail. Shoot me a G+ invite."
@@ -86,6 +101,9 @@ lefnire::trollIrc = ->
       return
     else if /.*habit.*down.*\?/.test text
       @checkHabitStatus client, bounce
+      return
+    else if (/async/i).test text
+      @whoSaidAsync client, bounce
       return
   )
 
