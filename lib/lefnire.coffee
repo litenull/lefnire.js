@@ -31,9 +31,8 @@ lefnire::someoneSaidRefLists = (client, bounce) ->
   if goodOrBad is 15
     client.say @defaultChannel, "refLists rock! so much functionality for free"
   else
-    client.say @defaultChannel, "oh man...refLists....don't even mention those! sorry guys, I need a breather"
-    bounce("refLists...why do you hate me so...;(")
-
+    client.say @defaultChannel, "ugh...refLists...I need a breather"
+    bounce "refLists...why do you hate me so...;("
 
 lefnire::trollIrc = ->
   client = new irc.Client(@defaultIrcServer, @defaultNick, {
