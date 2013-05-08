@@ -100,7 +100,7 @@ lefnire::trollIrc = ->
     if refListPattern.test text
       @someoneSaidRefLists client, bounce
       return
-    else if /.*habit.*down.*\?/.test text
+    else if (/.*habit.*down.*/i).test text
       @checkHabitStatus client, bounce
       return
     else if (/async/i).test text
