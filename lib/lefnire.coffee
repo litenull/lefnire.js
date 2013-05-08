@@ -21,6 +21,9 @@ lefnire::say = (text) ->
 lefnire::introduce = ->
   console.log @asciiImage + "\n"
 
+lefnire::tellIrc = (message) ->
+  @client.say @defaultChannel, message
+
 lefnire::respond = (message) ->
   setTimeout =>
       @client.say @defaultChannel, message
@@ -47,17 +50,26 @@ lefnire::checkHabitStatus = (client, bounce) ->
     .set('Accept: gzip, deflate')
     .timeout(10000)
     .end((err, res) =>
-          if res and res.ok
-            res.text = JSON.parse(res.text)
+      if res and res.ok
+        res.text = JSON.parse(res.text)
 
-          if not res
-            client.say @defaultChannel, "...man, these memory leaks are killing me...refLists...ugh..."
-          else if res and res.ok and res.text.status is "up"
-            setTimeout =>
-              client.say @defaultChannel, "don't scare me like that! I thought Habit was down again! (it's not. I just checked)"
-            , 2000
+      if not res
+        request.get('https://beta.habitrpg.com/api/v1/status')
+          .type('application/json')
+          .set('Accept: gzip, deflate')
+          .timeout(10000)
+          .end((err, res) =>
+            if res and res.ok and res.text.status is "up"
+              @tellIrc "guys, looks like prod might be restarting or something, but beta is working great. use that for now."
+            else
+              client.say @defaultChannel, "...man, these memory leaks are killing me...both beta and prod...why...refLists...ugh..."
+          )
+      else if res and res.ok and res.text.status is "up"
+        setTimeout =>
+          client.say @defaultChannel, "don't scare me like that! I thought Habit was down again! (it's not. I just checked)"
+        , 2000
 
-          @say "Check complete."
+      @say "Check complete."
     )
 
 lefnire::whoSaidAsync = (client, bounce) ->
