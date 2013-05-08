@@ -6,6 +6,7 @@ mersenne = require('mersenne')
 moment = require('moment')
 request = require('superagent')
 github = require('octonode')
+_ = require('underscore')
 
 lefnire = ->
   @textPrefix = "lefnire says: "
@@ -33,11 +34,23 @@ lefnire::introduce = ->
   console.log @asciiImage + "\n"
 
 lefnire::tellIrc = (message) ->
+  if not _.isArray(message)
+    message = [message]
+
+  risingTimeout = 0;
+  message.forEach (msg) =>
+    setTimeout =>
+        @tellIrcOneThing msg
+      , risingTimeout
+    risingTimeout += 2500
+  risingTimeout
+
+lefnire::tellIrcOneThing = (message) ->
   @client.say @defaultChannel, message
 
 lefnire::respond = (message) ->
   setTimeout =>
-      @client.say @defaultChannel, message
+      @tellIrc message
     , 1000
 
 lefnire::memoryleaks = ->
@@ -143,6 +156,16 @@ lefnire::trollIrc = ->
       return
     else if (/.*any.*issues.*/i).test text
       @countGitHubIssues()
+      return
+    else if (/backer gear/i).test text
+      risingTimeout = @tellIrc ["oh bother...", "ok, i'm gonna heads-down the backer gear", "you punks", "i'm OUT", ":)"]
+
+      # TODO: Functionatize
+      console.log "Setting backer gear quit timeout to #{risingTimeout}" if argv.debug
+      setTimeout =>
+        @joinMessage = "got tired of working on backer gear...argh, refLists..."
+        @bounce "going heads-down on backer gear"
+      , risingTimeout
       return
     else
       console.log "No messages matched" if argv.debug
