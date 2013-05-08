@@ -4,6 +4,7 @@ util = require('util')
 argv = require('optimist').argv
 mersenne = require('mersenne')
 moment = require('moment')
+request = require('superagent')
 
 lefnire = ->
   @textPrefix = "lefnire says: "
