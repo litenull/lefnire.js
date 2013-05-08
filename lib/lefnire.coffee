@@ -44,13 +44,14 @@ lefnire::checkHabitStatus = (client, bounce) ->
   request.get('https://habitrpg.com/api/v1/status')
     .type('application/json')
     .set('Accept: gzip, deflate')
-    .end((res) =>
-          if res.ok
+    .timeout(5000)
+    .end((err, res) =>
+          if res and res.ok
             res.text = JSON.parse(res.text)
 
-          if res.ok and res.text.status isnt "up"
+          if not res
             client.say @defaultChannel, "...man, these memory leaks are killing me...refLists...ugh..."
-          else
+          else if res and res.ok and res.text.status is "up"
             setTimeout =>
               client.say @defaultChannel, "don't scare me like that! I thought Habit was down again! (it's not. I just checked)"
             , 2000
