@@ -34,6 +34,22 @@ lefnire::someoneSaidRefLists = (client, bounce) ->
     client.say @defaultChannel, "ugh...refLists...I need a breather"
     bounce "refLists...why do you hate me so...;("
 
+lefnire::checkHabitStatus = (client, bounce) ->
+  request.get('https://habitrpg.com/api/v1/status')
+    .type('application/json')
+    .set('Accept: gzip, deflate')
+    .end((res) =>
+          if res.ok
+            res.text = JSON.parse(res.text)
+
+          if res.ok and res.text.status isnt "up"
+            client.say @defaultChannel, "...man, these memory leaks are killing me...refLists...ugh..."
+          else
+            setTimeout =>
+              client.say @defaultChannel, "don't scare me like that! I thought Habit was down again!"
+            , 2000
+    )
+
 lefnire::trollIrc = ->
   client = new irc.Client(@defaultIrcServer, @defaultNick, {
     port: 6665,
@@ -67,8 +83,10 @@ lefnire::trollIrc = ->
     refListPattern = /reflist/i
     if refListPattern.test text
       @someoneSaidRefLists client, bounce
-    else if /.*habit.*down\?/.test text
-
+      return
+    else if /.*habit.*down.*\?/.test text
+      @checkHabitStatus client, bounce
+      return
   )
 
   client.addListener('join', (channel, nick, message) =>
