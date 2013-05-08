@@ -30,6 +30,6 @@
     "optimist": "~0.4.0",
     "coffee-script": "~1.6.2",
     "irc": "~0.3.6",
-    "moment": "~2.0.0"
+    "moment": "~2.0.0",
   }
 }

@@ -11,6 +11,7 @@ lefnire = ->
   @defaultIrcServer = 'chat.freenode.org'
   @defaultNick = 'lefnire-js'
   @defaultChannel = '#habitrpg'
+  @joinMessage
 
 lefnire::say = (text) ->
   console.log @textPrefix + text
@@ -24,19 +25,34 @@ lefnire::memoryleaks = ->
 lefnire::buildnewfeature = ->
   "Thank god for Derby"
 
+lefnire::someoneSaidRefLists = (client, bounce) ->
+  goodOrBad = mersenne.rand 31
+  if goodOrBad is 15
+    client.say @defaultChannel, "refLists rock! so much functionality for free"
+  else
+    client.say @defaultChannel, "oh man...refLists....don't even mention those! sorry guys, I need a breather"
+    bounce("refLists...why do you hate me so...;(")
+
+
 lefnire::trollIrc = ->
   client = new irc.Client(@defaultIrcServer, @defaultNick, {
     port: 6665,
-    channels: [@defaultChannel]
+    channels: [@defaultChannel],
+    autoConnect: false,
   })
 
-  disconnect = (message) =>
-    @say "Whoa, something came up! Gotta bail. Shoot me a G+ invite."
+  bounce = (message) =>
+    @say message || "Whoa, something came up! Gotta bail. Shoot me a G+ invite."
     console.log "Quit message should be: #{message}" if argv.debug
     client.disconnect message # Message doesn't work. But hopefully it one day will.
-    process.exit()
+    setTimeout(=>
+        client.connect()
+        @joinMessage = "phew, now I feel better. what's up guys?"
+      , 10000
+    )
 
   client.addListener('error', (message) ->
+    console.log "error listener fired" if argv.debug
     messageDump = util.inspect(message)
     console.log("error: #{messageDump}") if argv.debug
   )
@@ -47,34 +63,38 @@ lefnire::trollIrc = ->
   )
 
   client.addListener("message#{@defaultChannel}", (nick, text, message) =>
+    console.log "message#{@defaultChannel} listener fired" if argv.debug
     refListPattern = /reflist/i
     if refListPattern.test text
-      client.say @defaultChannel, "oh man...refLists....don't even mention those! sorry guys, I need a breather"
-      disconnect("refLists...why do you hate me so...;(")
-    else
-      client.say @defaultChannel, "what about reflists?"
+      @someoneSaidRefLists client, bounce
+    else if /.*habit.*down\?/.test text
+
   )
 
   client.addListener('join', (channel, nick, message) =>
+    console.log "join listener fired" if argv.debug
     messageDump = util.inspect message
     console.log("#{nick} joined #{channel}. message: #{messageDump}") if argv.debug
     if (nick is @defaultNick and channel is @defaultChannel)
-      mersenne.seed parseInt(moment().format('X'))
-      saySomething = mersenne.rand 6
+      if not @joinMessage
+        mersenne.seed parseInt(moment().format('X'))
+        saySomething = mersenne.rand 6
 
-      quoteMap = {
-        1: @memoryleaks
-        2: @buildnewfeature
-      }
+        quoteMap = {
+          1: @memoryleaks
+          2: @buildnewfeature
+        }
 
-      if parseInt(saySomething) is 1 or parseInt(saySomething) is 2
-        client.say @defaultChannel, quoteMap[saySomething]()
+        if parseInt(saySomething) is 1 or parseInt(saySomething) is 2
+          client.say @defaultChannel, quoteMap[saySomething]()
+      else
+        client.say @defaultChannel, @joinMessage
+        @joinMessage = undefined
 
-      setTimeout(disconnect, 3000) unless argv.irc and not argv.troll # Trolling wins.
-    else
-      @say "...my channel-exiting code isn't working!"
+      setTimeout(bounce, 3000) unless argv.irc and not argv.troll # Trolling wins.
   )
 
+  console.log "Connecting to IRC..." if argv.debug
   client.connect()
 
 module.exports = lefnire
