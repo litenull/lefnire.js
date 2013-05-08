@@ -44,7 +44,6 @@ lefnire::checkHabitStatus = (client, bounce) ->
   request.get('https://habitrpg.com/api/v1/status')
     .type('application/json')
     .set('Accept: gzip, deflate')
-    .timeout(5000)
     .end((err, res) =>
           if res and res.ok
             res.text = JSON.parse(res.text)
