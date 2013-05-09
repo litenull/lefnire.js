@@ -135,6 +135,10 @@ lefnire::headsDownOnBackerGear = ->
       @bounce "going heads-down on backer gear"
     , risingTimeout
 
+lefnire::mrConceptThinksIAm = (nick) ->
+  @say "Did you see that!? #{nick} doesn't think I'm real!"
+  @tellIrc "A testimonial from MrConcept: \"I just can't distinguish real from fake anymore\"; you be the judge"
+
 lefnire::trollIrc = ->
   @client = new irc.Client(@defaultIrcServer, @defaultNick, {
     port: 6665,
@@ -175,6 +179,8 @@ lefnire::trollIrc = ->
     else if (/backer gear/i).test text
       @headsDownOnBackerGear()
       return
+    else if (/(are you real|so real(|istic))/i).test text
+      @mrConceptThinksIAm nick
     else
       console.log "No messages matched" if argv.debug
   )
