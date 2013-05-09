@@ -126,10 +126,9 @@ lefnire::countGitHubIssues = ->
           @tellIrc "no criticals...or I'm too tired to notice"
     )
 
+# Like @tellIrc, but delayed a little
 lefnire::ohYeahBackerGear = ->
-  setTimeout =>
-      @tellIrc "backer gear is almost done :)"
-    , 1550
+  @respond "backer gear is almost done :)"
 
 lefnire::mrConceptThinksIAm = (nick) ->
   @say "Did you see that!? #{nick} doesn't think I'm real!"
