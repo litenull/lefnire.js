@@ -126,14 +126,10 @@ lefnire::countGitHubIssues = ->
           @tellIrc "no criticals...or I'm too tired to notice"
     )
 
-lefnire::headsDownOnBackerGear = ->
-  risingTimeout = @tellIrc ["oh bother...", "ok, i'm gonna heads-down the backer gear", "you punks", "i'm OUT", ":)"]
-
-  console.log "Setting backer gear quit timeout to #{risingTimeout}" if argv.debug
+lefnire::ohYeahBackerGear = ->
   setTimeout =>
-      @joinMessage = "got tired of working on backer gear...argh, refLists..."
-      @bounce "going heads-down on backer gear"
-    , risingTimeout
+      @tellIrc "backer gear is almost done :)"
+    , 1550
 
 lefnire::mrConceptThinksIAm = (nick) ->
   @say "Did you see that!? #{nick} doesn't think I'm real!"
@@ -177,7 +173,7 @@ lefnire::trollIrc = ->
       @countGitHubIssues()
       return
     else if (/backer gear/i).test text
-      @headsDownOnBackerGear()
+      @ohYeahBackerGear()
       return
     else if (/(are you real|so real(|istic))/i).test text
       @mrConceptThinksIAm nick
