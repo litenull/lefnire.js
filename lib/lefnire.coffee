@@ -42,7 +42,7 @@ lefnire::tellIrc = (message) ->
     setTimeout =>
         @tellIrcOneThing msg
       , risingTimeout
-    risingTimeout += 2500
+    risingTimeout += 1700
   risingTimeout
 
 lefnire::tellIrcOneThing = (message) ->
@@ -65,8 +65,10 @@ lefnire::someoneSaidRefLists = ->
     @tellIrc "refLists rock! so much functionality for free"
   else
     @tellIrc "ugh...refLists...I need a breather"
-    @joinMessage = "phew, now I feel better. what's up guys?"
-    @bounce "refLists...why do you hate me so...;("
+    setTimeout =>
+        @joinMessage = "phew, now I feel better. what's up guys?"
+        @bounce "refLists...why do you hate me so...;("
+      , 2000
 
 lefnire::checkHabitStatus = ->
   @say "Someone wants to know if Habit is down. Let's check..."
