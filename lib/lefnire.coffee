@@ -86,6 +86,9 @@ lefnire::checkHabitStatus = ->
           .set('Accept: gzip, deflate')
           .timeout(10000)
           .end((err, res) =>
+            if res and res.ok
+              res.text = JSON.parse(res.text)
+
             if res and res.ok and res.text.status is "up"
               @tellIrc "guys, looks like prod might be restarting or something, but beta is working great. use that for now."
             else
