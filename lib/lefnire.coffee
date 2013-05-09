@@ -126,6 +126,15 @@ lefnire::countGitHubIssues = ->
           @tellIrc "no criticals...or I'm too tired to notice"
     )
 
+lefnire::headsDownOnBackerGear = ->
+  risingTimeout = @tellIrc ["oh bother...", "ok, i'm gonna heads-down the backer gear", "you punks", "i'm OUT", ":)"]
+
+  console.log "Setting backer gear quit timeout to #{risingTimeout}" if argv.debug
+  setTimeout =>
+      @joinMessage = "got tired of working on backer gear...argh, refLists..."
+      @bounce "going heads-down on backer gear"
+    , risingTimeout
+
 lefnire::trollIrc = ->
   @client = new irc.Client(@defaultIrcServer, @defaultNick, {
     port: 6665,
@@ -164,14 +173,7 @@ lefnire::trollIrc = ->
       @countGitHubIssues()
       return
     else if (/backer gear/i).test text
-      risingTimeout = @tellIrc ["oh bother...", "ok, i'm gonna heads-down the backer gear", "you punks", "i'm OUT", ":)"]
-
-      # TODO: Functionatize
-      console.log "Setting backer gear quit timeout to #{risingTimeout}" if argv.debug
-      setTimeout =>
-        @joinMessage = "got tired of working on backer gear...argh, refLists..."
-        @bounce "going heads-down on backer gear"
-      , risingTimeout
+      @headsDownOnBackerGear()
       return
     else
       console.log "No messages matched" if argv.debug
