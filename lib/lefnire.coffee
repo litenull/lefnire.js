@@ -96,7 +96,7 @@ lefnire::checkHabitStatus = ->
           )
       else if res and res.ok and res.text.status is "up"
         setTimeout =>
-          @tellIrc "don't scare me like that! I thought Habit was down again! (it's not. I just checked)"
+          @tellIrc "don't scare me like that! I thought Habit was down! (it's not. I just checked)"
         , 2000
 
       @say "Check complete."
