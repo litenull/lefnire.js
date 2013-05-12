@@ -22,7 +22,14 @@ if argv.troll or argv.irc
   suffix = "Let me try and find you on IRC..."
 else
   suffix = "Shoot me a G+"
-thisLefnire.say "Dunno what you want. #{suffix}"
+
+# 1-in-10 chance of trolling even though you just wanted to IRC
+if argv.irc and thisLefnire.maybe 10
+  argv.troll = true
+  thisLefnire.seriousTrolling = true
+  thisLefnire.say "Nah, dude, I'm too busy to go on IRC...oh snap, my phone's on...let's see...how do I turn it off?"
+else
+  thisLefnire.say "Dunno what you want. #{suffix}"
 
 # Initiate IRC sequence!
 thisLefnire.trollIrc() if argv.troll or argv.irc

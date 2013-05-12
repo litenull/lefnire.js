@@ -17,9 +17,11 @@ lefnire = ->
   @joinMessage
   @client
   @bounce = (message, endProcess) =>
-    @say message || "Whoa, something came up! Gotta bail. Shoot me a G+ invite."
+    @say (message || "Whoa, something came up! Gotta bail. Shoot me a G+ invite.") unless @seriousTrolling
     console.log "Quit message should be: #{message}" if argv.debug
     @client.disconnect message, =>
+      if @seriousTrolling
+        @say "Oh, there we go!"
       process.exit() if endProcess # Message doesn't work. But hopefully it one day will.
     setTimeout(=>
         @client.connect()
