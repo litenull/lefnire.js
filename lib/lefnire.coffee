@@ -33,6 +33,14 @@ lefnire::say = (text) ->
 lefnire::introduce = ->
   console.log @asciiImage + "\n"
 
+lefnire::maybe = (chance) ->
+  chance = parseInt chance
+  mersenne.seed parseInt(moment().format('X'))
+  randomness = mersenne.rand chance + 1
+  if randomness is chance
+    return true
+  false
+
 lefnire::tellIrc = (message) ->
   if not _.isArray(message)
     message = [message]
@@ -52,6 +60,12 @@ lefnire::respond = (message) ->
   setTimeout =>
       @tellIrc message
     , 1000
+
+lefnire::maybeRespond = (message) ->
+  if @maybe 4
+    @respond message
+  else
+    @say "#{message}? I ain't saying that."
 
 lefnire::memoryleaks = ->
   "I hate derby so much right now"
@@ -176,6 +190,8 @@ lefnire::trollIrc = ->
       return
     else if (/(are you real|so real(|istic))/i).test text
       @mrConceptThinksIAm nick
+    else if (/mage/i).test text
+      @maybeRespond "Make sure you're saying \"mage\" the Habit way: https://soundcloud.com/user87743033/lefnire-js-mez"
     else
       console.log "No messages matched" if argv.debug
   )
