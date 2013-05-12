@@ -27,6 +27,19 @@ lefnire = ->
         @client.connect()
       , 10000
     )
+  @getCriticalCount = (callback) =>
+    request.get('https://api.github.com/repos/lefnire/habitrpg/issues?state=open&labels=critical')
+    .set('User-Agent', 'https://github.com/litenull/lefnire.js (Node.js SuperAgent)')
+    .end((res) =>
+        @say "Got response."
+        console.log "Error? #{util.inspect(res.error)}" if argv.debug and res
+        console.log "Response? #{util.inspect(res)}" if argv.debug
+        if (res and res.ok)
+          console.log "Length of response was #{res.length}" if argv.debug
+          count = res.body.length
+          callback(count)
+    )
+
   @end
 
 lefnire::say = (text) ->
@@ -125,22 +138,18 @@ lefnire::whoSaidAsync = ->
   else
     @respond "ah, good ol' async...can't wait for the angular rewrite to be done"
 
+lefnire::updateMood = ->
+  @getCriticalCount (count) =>
+    # TODO: Abstract out mood map
+
 lefnire::countGitHubIssues = ->
   @say "Checking GitHub issues..."
   @tellIrc "hold up, let me check the queue..."
-  request.get('https://api.github.com/repos/lefnire/habitrpg/issues?state=open&labels=critical')
-    .set('User-Agent', 'https://github.com/litenull/lefnire.js (Node.js SuperAgent)')
-    .end((res) =>
-      @say "Got response."
-      console.log "Error? #{util.inspect(res.error)}" if argv.debug and res
-      console.log "Response? #{util.inspect(res)}" if argv.debug
-      if (res and res.ok)
-        console.log "Length of response was #{res.length}" if argv.debug
-        if (res.body.length)
-          @tellIrc "yeah, argh, still #{res.body.length} criticals :("
-        else
-          @tellIrc "no criticals...or I'm too tired to notice"
-    )
+  @getCriticalCount (count) =>
+    if (count)
+      @tellIrc "yeah, argh, still #{count} criticals :("
+    else
+      @tellIrc "no criticals...or I'm too tired to notice"
 
 # Like @tellIrc, but delayed a little
 lefnire::ohYeahBackerGear = ->
