@@ -20,8 +20,10 @@ lefnire = ->
   @myNick = @defaultNick
   # Allow specifying moodNick on the command line for testing purposes
   @moodNick = if argv.moodNick then argv.moodNick else 'lefnire'
+  @githubMoodNick = 'lefnire'
   @moodFactors = {
-    github: 0,
+    github: 0
+    githubEvents: 0
     sentiment: 0
   }
   @speechScoreNormalizer = 0.25
@@ -57,8 +59,14 @@ lefnire = ->
         count = res.length
         callback(count)
     )
+  @getGitHubEvents = (callback) =>
+    @github.events.getFromUser({
+      user: @githubMoodNick
+      per_page: 100
+    }, callback) # (err, res)
   @currentMood = 0
   @adjustMoodFromCrits()
+  @adjustMoodFromActivity()
 
   @say "My mood is based on what #{@moodNick} says." if argv.debug
   @end
@@ -178,6 +186,43 @@ lefnire::adjustMoodFromCrits = ->
   @getCriticalCount (count) =>
     @moodFactors.github = count
     @updateMood()
+
+lefnire::adjustMoodFromActivity = ->
+  @moodFactors.githubEvents = 0 # Reset
+
+  # Get up to 100 events (probably 30, GitHub hard limit?) and analyze
+  @getGitHubEvents((err, resArray) =>
+    if (!err)
+      resArray.forEach((res, resNumber) =>
+        text = undefined
+        switch res.type
+          when "CommitCommentEvent", "IssueCommentEvent", "PullRequestReviewCommentEvent"
+            text = res.payload.comment.body
+          when "IssuesEvent"
+            if res.payload.action is "opened"
+              text = res.payload.issue.body
+          when "PullRequestEvent"
+            if res.payload.pull_request.action is "opened"
+              text = res.payload.pull_request.body
+          when "PushEvent" # This one is extra fun
+            commitText = []
+            res.payload.commits.forEach((commit, commitNumber) =>
+              commitText[commitText.length] = commit.message
+            )
+            text = commitText.join ", "
+          else text = undefined
+
+        if text
+          score = understand.analyze text
+          scoreDump = util.inspect(score)
+          console.log "Scored text from GitHub #{res.type}, \"#{text}\", as follows: #{scoreDump}" if argv.debug
+          @moodFactors.githubEvents -= (score.score * @speechScoreNormalizer)
+        else
+          console.log "We don't process #{res.type}, so we skipped it." if argv.debug
+      )
+      console.log "Final GitHub Events adjustment: #{@moodFactors.githubEvents}" if argv.debug
+      @updateMood()
+  )
 
 lefnire::countGitHubIssues = ->
   @say "Checking GitHub issues..."
