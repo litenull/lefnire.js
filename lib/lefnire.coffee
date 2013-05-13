@@ -5,9 +5,10 @@ argv = require('optimist').argv
 mersenne = require('mersenne')
 moment = require('moment')
 request = require('superagent')
-github = require('octonode')
+GitHubApi = require('github')
 _ = require('underscore')
-understand = require('speakeasy-nlp')
+understand = require('sentimental')
+# understand = require('speakeasy-nlp')
 
 argv.debug = true if argv.dump # --dump implies --debug
 
@@ -23,7 +24,11 @@ lefnire = ->
     github: 0,
     sentiment: 0
   }
-  @defaultChannel = '#habitrpg'
+  @speechScoreNormalizer = 0.25
+  @github = new GitHubApi {
+    version: "3.0.0"
+  }
+  @defaultChannel = if argv.channel then argv.channel else '#habitrpg'
   @joinMessage
   @client
   @bounce = (message, endProcess) =>
@@ -38,15 +43,19 @@ lefnire = ->
       , 10000
     )
   @getCriticalCount = (callback) =>
-    request.get('https://api.github.com/repos/lefnire/habitrpg/issues?state=open&labels=critical')
-    .set('User-Agent', 'https://github.com/litenull/lefnire.js (Node.js SuperAgent)')
-    .end((res) =>
-        @say "Got response."
-        console.log "Error? #{util.inspect(res.error)}" if argv.dump and res
-        console.log "Response? #{util.inspect(res)}" if argv.dump
-        if (res and res.ok)
-          count = res.body.length
-          callback(count)
+    @github.issues.repoIssues({
+      user: "lefnire"
+      repo: "habitrpg"
+      state: "open"
+      labels: "critical"
+      per_page: 100
+    }, (err, res) =>
+      @say "Got response."
+      console.log "Error? #{util.inspect(err)}" if argv.dump and err
+      console.log "Response? #{util.inspect(res)}" if argv.dump
+      if (!err)
+        count = res.length
+        callback(count)
     )
   @currentMood = 0
   @adjustMoodFromCrits()
@@ -145,8 +154,7 @@ lefnire::checkHabitStatus = ->
     )
 
 lefnire::whoSaidAsync = ->
-  loveHate = mersenne.rand 3
-  if loveHate is 1
+  if @maybe 2
     @maybeRespond "async? that's old...you gotta try Derby, man!", 2
   else
     @maybeRespond "ah, good ol' async...can't wait for the angular rewrite to be done", 2
@@ -159,7 +167,7 @@ lefnire::updateMood = ->
   theKeys.forEach((value, key) =>
     # Ignore if undefined. Probably an Object.keys artifact
     if value isnt undefined
-      console.log "updateMood values are #{value}, #{key}" if argv.debug
+      console.log "updateMood values are #{value}, #{@moodFactors[value]}" if argv.debug
       @currentMood += @moodFactors[value]
   )
 
@@ -249,12 +257,13 @@ lefnire::trollIrc = ->
     else
       console.log "No messages matched" if argv.debug
 
-    if (nick == @moodNick)
-      messageScore = understand.sentiment.analyze text
+    console.log "moodNick is: #{@moodNick}" if argv.debug
+    if (nick is @moodNick)
+      messageScore = understand.analyze text
       messageScoreDump = util.inspect messageScore
       @say "#{@moodNick} said \"#{text}\", and I scored it like this: #{messageScoreDump}"
       # We do the opposite of sentiment's score because 0 is the best mood, 30 the worst
-      @moodFactors.sentiment -= (messageScore.score * 0.25)
+      @moodFactors.sentiment -= (messageScore.score * @speechScoreNormalizer)
       @updateMood()
   )
 
