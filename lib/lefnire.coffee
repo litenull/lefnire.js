@@ -7,12 +7,22 @@ moment = require('moment')
 request = require('superagent')
 github = require('octonode')
 _ = require('underscore')
+understand = require('speakeasy-nlp')
+
+argv.debug = true if argv.dump # --dump implies --debug
 
 lefnire = ->
   @textPrefix = "lefnire says: "
   @asciiImage = "$$ZZZZZZZZZOZZZZOO8DDND8DDD888$ZO$?OOZ77?7Z$$$$$$$$$$$$ZZZZZ$$ZZZ8==IIII????????\r\n$$$$ZZZZZZZZZZZZ8DDDDDDDDDDOZMO$Z$$$N88OO$7$$$$7$$$$$$$$$$$$$$Z$87:?I???????????\r\n$$$$ZZZZZZOOZZOOO8DDNNNNND8NZODDOO88DNDDO$77ZZOZ77$$$$$$$$$$$$$$O+=IIII?III?????\r\n$$$$ZZZZOZZOOZOO88DDNNNND88888O8OOOODDDN8OZ$Z8D8$$$$$$$$$$$$$$$$7~?II???????????\r\n$$$$ZZZZZZOOOOOZOODNNNNDD8Z$77I?+===?7ZODOZZ8$$8OI7$$$$$$$$$$$$$==II????????????\r\n$$$ZZZZZZZZZOOOO8DNNNDDDOZZ$77I?+====++IDD7IOZI7O?=$$$$$$$$$$$$O=?II??????????II\r\nZZZZZZZZZZZZOOOO8NNNDDD8OOZZ$7I+=~==:~==7ON?~=$7$?~I7$$$$$$$$$7Z=I??????????IIII\r\nO8OZZZZZZZZZZZOOONNDDD88OOOZ$7I++===::::77$D:~IZ7~,I7$$$$$$7$$O7?II???III????III\r\nOZO88OZZZZZZZZZOODDODD88OOOO$7??+==~:::,++?7~?I?I:,I$$$77777I7Z=I?????????????II\r\nOZZ8888OOOOOOOOO8D88D888OOOO$II?++++::,,,:=7Z+=I7=,I$777777II$I~??????+????II???\r\n$$$OOOO8OOOOOOOODDO8D88OO88O$7777$$7=:,,..,+$7??=+,?77IIIIIII7==+???+++++????III\r\n8OZ$OOOOOOOOOOOO8D8DDDD8888O8DDDD88O7+:,,,,+Z$+?+?:=I7III???II=++=++====7$$$$$$Z\r\nOOOO8ZZOOOOOOOOZODNNNNND88OOOOOOZZ$7?+=:,,,~7$I?~?~~II7II77$7I77777777$$OOOZ$777\r\nOOOOOO8OOOOO8O88O8NNDDNND8$+7ZO8D8O7?~,,,,:?O$II$I=~77IIIII7??+++++++?$8+:,=~===\r\nDDD888888888OOOOOO8DNNNNDO+:$88D8M87I7?~,,,:ZOZ$~~++77II???I++==~~~::~$7,:,,,,,,\r\nDNDOOZO8888888888OZDNNNN8$=~?$8D8Z7++=~:,,.,?7+:=~$~?++++=:.,,,,,,....,,..=+I:..\r\n?=+?NDDDZO8888ZOI?Z8DDNNO7=~~~+7$$77?==:,...~~,+I=+~==+=:,...............,+?D$I7\r\n=+?I.+DNZZ8DD88DO$O8DDD8O7=~~=+I7II?==~:....=~,+8?,.,....................,?$88DD\r\nI+~~..:NDDN87Z888OOO8DDDO7+=~=?ZO$7?=~:,,..,?~:=~:.......................,I$ODDN\r\n7II?=:=MD8D8ZZZZDOZODDN8O7+~~~~$88O$=~:,,..:++~:,........................:I$8+ZM\r\nZ$Z$7DMNNNNOZ$Z$I7$8DDND8O?=+I$$$ODDI~::,,,:+~=+=I?++=+=?=,::,,,........,+?+O,=M\r\nNNNMNNNDNNDDNNOZ7$7ZDNNNNND888OZ$ZO887~,~,,=?~:?:::,,,,..,................~ZZ.:M\r\nZOMNDNDN8OZZDM8ODZ$$NNNNDDD8OOZZ7$O88O+:=~:~~:,~.........................:=,:.?N\r\n...~8DDDOZO$DN87$$$7DDNNNDDDZI+=?8D8DO?:?+~=+,...........................:7Z8++I\r\n7??7888DOZ7$8NZ7III$8DNNNNDDOZZZ7??$88?=7II?=.:7I+~==~~?.................~?IZ,~,\r\nMMMMDNMMOZ$$8DO77III8DDDDDD8D8OZ+=?$88I?$II7:.=MMZ~......................:I7$,:,\r\nO8ZDM+.,7OZZ8DOO$7II$NNDDDDD8OZ7++I$8Z77$$7I,.~M8NN8$D=:.................~$$I.:,\r\nO$78I....7OZ8MZZ~OZ7I$DNDDDD88O$I$$ZZZ$$$$I~,.:DZOMD7II:.................=Z$?.,.\r\nZZ=~$?+?,....,8NO:$M=?$NDDDD8O$I7$ZOOOZZ7+~:,,:8$OMN$77Z:.........,......+$7I~:.\r\n$$7$~.,?,....?N8~ODZMD77DDDDD8Z77$ZZZ$$$==~:,~ZM$NMM8ZZODD$:,,,,..~$+:...=?$,=+.\r\n?==7I77~...,.~7~8D8ZIMDMNDDDD8OZ7OOOOZZ$7I?+~:,,.........+MD8ZOMMMNZDNM8$$$7I+=:\r\n:,.:.,:~~:,.+I~=DDZOMNMNNNNNDDDD7OOOOOZZ$7I?=~:,.........7M$ZZI~IZDNDMMMNND8+=+=\r\n:7?I=+?=:,~,IM$88OZDNMNMNNNMNNDD$ZOOOOZZ$77?=~:,........,ZMOZOO$+:,,+=+?II+:,,::\r\n~::.,......,ZD7$8NMNMNNNNNNMNNNDZZ8OOOZZZZI?=~:,........~=++I$Z$?+===+????II,..,\r\n,:,........,ZN8MNNNNNMNDNNMMNNNDOZ8OOOOZ887?=~:,.......:77ZZ$Z7?==~~~~=+++++=:..\r\n...,:,,::,.+MNNNNNNNMMNMDNMMNNND8ZOOOOOONN8I=~:,....,,=IO8ZZZ$?=~~~~=~=+++++=~::\r\n,,,.~:~.:OMDNNNNMMNNNNMMDDNNNNNNDZOOOOO8NDNO=~::,,.,~?$ZD88OO$I=====~I$$?II7=:,,\r\n~:::,...+MNNNNNNMMMNNNNNMMNNNNNNDZ8NNDDDNND8I?7+=+:,IZO7N888OZI???I?I7777777+~,,\r\n........MDNNNNNNMMMNNNNNNMNNNNNNDZO8MNNNDNNNDD8D?,,:I$O$8OOOZZ7I++?+??II7777I+~:\r\n:,.....=NNNMNNNNMMMMNNNNNMNNNNNNDOO88DNNNNNNNN$=,,:=IZZ888OO$Z$$77II+I77$ZZZZ$?+\r\n,,,:,,,$NNNNNNNNMMMMNNNNNNMNNNNNDO88O8NNMNNDO~::,,:=$ZO888O8Z$$$7II???I7ZZZOODI~\r\n,..,:.~NNNNNNNNNNMMMMMNNNNMNNNNNDOOOODNNDDNNM?::,,:~7$Z788OOZ$$$ZZOOOO8OOO88$I?~\r\n:,....7MMNMNNNNNNNMMMMMMNNMMDO8N8O888NDN$7$M8N=,..,,~+I$8OOODDDD88Z$OZOOOOOOI+::\r\n,,,,:?MMNMNNNNNNNNNMMMMMNNMMNNNN8O8ODNOZ$7I?$MI,....,~?7ZZO88888OZZZZZOOOOOO$I=~\r\n==+??8NNNNNMNMNNNNNMMMMMMMNMMNNNOO8OOOOZ$7I?~:=:....,:+$$ODDO88OZZZ$ZZZZOOOO$I?+\r\nI?+~ZMNNMMMNNMMMMMMMMMMMMMMMMMNNOO88OOOZ$7I?=~::......=INNDN8OOOZ$$$ODND888OIII7\r\n~:::IMNMNMMNNMMMMMMMMMMMMMMMNMMNO888OOOZ$7I?=~:,......,~NNNNND888D8888888OO$????\r\n:~=~MNNNNNNNNMMMMMMMMMMMMMMMMMMMND88OOOZ$7I?=::,,......=NNNNNND888OOOOOO8OOZ$7II\r\n?++7NNNNNNNNNNMMNMMMMMMMMMMMMMMMNNNMNDD8OZZ7?++==++?OMMNNNNNNNNNDDDDDDDDD88OOZZ$\r\nI+IMNNNNMMMMNMMMMMMMMMMNMMMMMMMMMNNNNNNNNNNNNNNNDDNDNNNNNNNNNNNNNNNNNNNNNNNNNDD8\r\n?+$MMNNMMMMNNMMMMMMMMMMMMMMMMMMMNNNNNNMNNNNNNDNNDNNNMNNNNNNNNNNNNNNNNNNNNNNNNNNN"
   @defaultIrcServer = 'chat.freenode.org'
   @defaultNick = 'lefnire-js'
+  @myNick = @defaultNick
+  # Allow specifying moodNick on the command line for testing purposes
+  @moodNick = if argv.moodNick then argv.moodNick else 'lefnire'
+  @moodFactors = {
+    github: 0,
+    sentiment: 0
+  }
   @defaultChannel = '#habitrpg'
   @joinMessage
   @client
@@ -32,14 +42,16 @@ lefnire = ->
     .set('User-Agent', 'https://github.com/litenull/lefnire.js (Node.js SuperAgent)')
     .end((res) =>
         @say "Got response."
-        console.log "Error? #{util.inspect(res.error)}" if argv.debug and res
-        console.log "Response? #{util.inspect(res)}" if argv.debug
+        console.log "Error? #{util.inspect(res.error)}" if argv.dump and res
+        console.log "Response? #{util.inspect(res)}" if argv.dump
         if (res and res.ok)
-          console.log "Length of response was #{res.length}" if argv.debug
           count = res.body.length
           callback(count)
     )
+  @currentMood = 0
+  @adjustMoodFromCrits()
 
+  @say "My mood is based on what #{@moodNick} says." if argv.debug
   @end
 
 lefnire::say = (text) ->
@@ -76,8 +88,10 @@ lefnire::respond = (message) ->
       @tellIrc message
     , 1000
 
-lefnire::maybeRespond = (message) ->
-  if @maybe 4
+lefnire::maybeRespond = (message, chance) ->
+  chance = parseInt chance || 4
+  console.log "1 in #{chance} chance of actually saying \"#{message}\"" if argv.debug
+  if @maybe chance
     @respond message
   else
     @say "#{message}? I ain't saying that."
@@ -89,8 +103,7 @@ lefnire::buildnewfeature = ->
   "Thank god for Derby"
 
 lefnire::someoneSaidRefLists = ->
-  goodOrBad = mersenne.rand 31
-  if goodOrBad is 15
+  if @maybe @currentMood
     @tellIrc "refLists rock! so much functionality for free"
   else
     @tellIrc "ugh...refLists...I need a breather"
@@ -134,13 +147,29 @@ lefnire::checkHabitStatus = ->
 lefnire::whoSaidAsync = ->
   loveHate = mersenne.rand 3
   if loveHate is 1
-    @respond "async? that's old...you gotta try Derby, man!"
+    @maybeRespond "async? that's old...you gotta try Derby, man!", 2
   else
-    @respond "ah, good ol' async...can't wait for the angular rewrite to be done"
+    @maybeRespond "ah, good ol' async...can't wait for the angular rewrite to be done", 2
 
 lefnire::updateMood = ->
+  # Reset mood
+  @currentMood = 0
+  # Put all the mood factors together
+  theKeys = Object.keys(@moodFactors)
+  theKeys.forEach((value, key) =>
+    # Ignore if undefined. Probably an Object.keys artifact
+    if value isnt undefined
+      console.log "updateMood values are #{value}, #{key}" if argv.debug
+      @currentMood += @moodFactors[value]
+  )
+
+  @currentMood = 0 if @currentMood < 0
+  @currentMood = 30 if @currentMood > 30
+
+lefnire::adjustMoodFromCrits = ->
   @getCriticalCount (count) =>
-    # TODO: Abstract out mood map
+    @moodFactors.github = count
+    @updateMood()
 
 lefnire::countGitHubIssues = ->
   @say "Checking GitHub issues..."
@@ -159,6 +188,12 @@ lefnire::mrConceptThinksIAm = (nick) ->
   @say "Did you see that!? #{nick} doesn't think I'm real!"
   @tellIrc "A testimonial from MrConcept: \"I just can't distinguish real from fake anymore\"; you be the judge"
 
+lefnire::mage = ->
+  if @currentMood >= 20
+    @respond "dude, you know the right way to pronounce \"mage\" right? https://soundcloud.com/user87743033/lefnire-js-mez"
+  else
+    @respond "have you heard The Habit Way™ to say \"mage\" ? https://soundcloud.com/user87743033/lefnire-js-mez :D"
+
 lefnire::trollIrc = ->
   @client = new irc.Client(@defaultIrcServer, @defaultNick, {
     port: 6665,
@@ -170,22 +205,28 @@ lefnire::trollIrc = ->
 
   bounce = @bounce
 
-  client.addListener('error', (message) ->
+  client.addListener('error', (message) =>
     console.log "error listener fired" if argv.debug
     messageDump = util.inspect(message)
     console.log("error: #{messageDump}") if argv.debug
   )
 
-  client.addListener('registered', (message) ->
+  client.addListener('registered', (message) =>
     messageDump = util.inspect message
     console.log("server said: #{messageDump}") if argv.debug
+    @myNick = message.args[0]
+    @say "My nickname on IRC is #{@myNick}" if argv.debug
   )
 
   client.addListener("message#{@defaultChannel}", (nick, text, message) =>
     console.log "message#{@defaultChannel} listener fired" if argv.debug
+    # Special triggers don't affect mood because they return early
     refListPattern = /reflist/i
     if refListPattern.test text
       @someoneSaidRefLists client, bounce
+      return
+    else if (/how you feeling/i).test text
+      @respond "I'd say about a #{@currentMood}"
       return
     else if (/.*habit.*down.*/i).test text
       @checkHabitStatus client, bounce
@@ -201,10 +242,20 @@ lefnire::trollIrc = ->
       return
     else if (/(are you real|so real(|istic))/i).test text
       @mrConceptThinksIAm nick
+      return
     else if (/mage/i).test text
-      @maybeRespond "Make sure you're saying \"mage\" the Habit way: https://soundcloud.com/user87743033/lefnire-js-mez"
+      @mage()
+      return
     else
       console.log "No messages matched" if argv.debug
+
+    if (nick == @moodNick)
+      messageScore = understand.sentiment.analyze text
+      messageScoreDump = util.inspect messageScore
+      @say "#{@moodNick} said \"#{text}\", and I scored it like this: #{messageScoreDump}"
+      # We do the opposite of sentiment's score because 0 is the best mood, 30 the worst
+      @moodFactors.sentiment -= (messageScore.score * 0.25)
+      @updateMood()
   )
 
   client.addListener('join', (channel, nick, message) =>
