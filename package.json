@@ -38,6 +38,8 @@
     "superagent": "~0.14.2",
     "octonode": "~0.3.1",
     "underscore": "~1.4.4",
-    "googleapis": "~0.2.8-alpha"
+    "googleapis": "~0.2.8-alpha",
+    "speakeasy-nlp": "~0.2.2",
+    "mongoose": "~3.6.10"
   }
 }
