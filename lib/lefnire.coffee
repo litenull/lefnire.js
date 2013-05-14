@@ -289,16 +289,16 @@ lefnire::trollIrc = ->
     # Special triggers don't affect mood because they return early
     refListPattern = /reflist/i
     if refListPattern.test text
-      @someoneSaidRefLists
+      @someoneSaidRefLists()
       return
     else if (/how you feeling/i).test text
       @respond "I'd say about a #{@currentMood}"
       return
     else if (/.*habit.*down.*/i).test text
-      @checkHabitStatus
+      @checkHabitStatus()
       return
     else if (/async/i).test text
-      @whoSaidAsync
+      @whoSaidAsync()
       return
     else if (/.*any.*issues.*/i).test text
       @countGitHubIssues()
