@@ -37,7 +37,8 @@ lefnire = ->
   @defaultChannel = if argv.channel then argv.channel else '#habitrpg'
   @joinMessage
   @client
-  @bounce = (message, endProcess) =>
+  @bounce = (message, endProcess, timeout) =>
+    timeout = timeout || 10000
     @say (message || "Whoa, something came up! Gotta bail. Shoot me a G+ invite.") unless @seriousTrolling
     console.log "Quit message should be: #{message}" if argv.debug
     @client.disconnect message, =>
@@ -46,7 +47,7 @@ lefnire = ->
       process.exit() if endProcess # Message doesn't work. But hopefully it one day will.
     setTimeout(=>
         @client.connect()
-      , 10000
+      , timeout
     )
   @getCriticalCount = (callback) =>
     @github.issues.repoIssues({
@@ -71,6 +72,13 @@ lefnire = ->
   @currentMood = 0
   @adjustMoodFromCrits()
   @adjustMoodFromActivity()
+
+  # Stores latest IRC messages
+  @onMyMind = 0
+  @mindTimers = []
+
+  @ircFrustrationTimeout = 30
+  @ircFrustrationLimit = 8
 
   @say "My mood is based on what #{@moodNick} says." if argv.debug
   @end
@@ -268,6 +276,28 @@ lefnire::disambiguate = ->
 lefnire::ambiguate = ->
   @selfRename @defaultNick
 
+lefnire::theyreTalkingAgain = (text) ->
+  @onMyMind++
+  @mindTimers.push setTimeout((=>
+    @onMyMind--
+    @mindTimers.shift()
+  ), @ircFrustrationTimeout * 1000)
+  console.log "#{@onMyMind} messages in the last #{@ircFrustrationTimeout} seconds."
+
+  if @onMyMind >= @ircFrustrationLimit and @maybe 5
+    finalTimeout = @tellIrc [
+      "alright my friends"
+      "i love you guys, but i get all the notifications"
+      "i'll be back later"
+    ]
+    @onMyMind = 0 # Reinitialize
+    @mindTimers.forEach((theTimer) =>
+      clearTimeout(theTimer)
+    )
+    setTimeout((=>
+      @bounce "really should reconfigure my irc client", false, 60000
+    ), finalTimeout)
+
 lefnire::trollIrc = ->
   @client = new irc.Client(@defaultIrcServer, @defaultNick, {
     port: 6665,
@@ -300,32 +330,25 @@ lefnire::trollIrc = ->
     refListPattern = /reflist/i
     if refListPattern.test text
       @someoneSaidRefLists()
-      return
     else if (/how you feeling/i).test text
       @respond "I'd say about a #{@currentMood}"
-      return
     else if (/.*habit.*down.*/i).test text
       @checkHabitStatus()
-      return
     else if (/async/i).test text
       @whoSaidAsync()
-      return
     else if (/.*any.*issues.*/i).test text
       @countGitHubIssues()
-      return
     else if (/backer gear/i).test text
       @ohYeahBackerGear()
-      return
     else if (/(are you real|so real(|istic))/i).test text
       @mrConceptThinksIAm nick
-      return
     else if (/mage/i).test text
       @mage()
-      return
     else
-      console.log "No messages matched" if argv.debug
+      # Store message for potential rage quit
+      console.log "No messages matched. Storing in latest messages" if argv.debug
+      @theyreTalkingAgain text
 
-    console.log "moodNick is: #{@moodNick}" if argv.debug
     if (nick is @moodNick)
       messageScore = understand.analyze text
       messageScoreDump = util.inspect messageScore
