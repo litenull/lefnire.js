@@ -122,7 +122,7 @@ lefnire::buildnewfeature = ->
   "Thank god for Derby"
 
 lefnire::someoneSaidRefLists = ->
-  if @maybe @currentMood
+  if @maybe (@currentMood / 4)
     @tellIrc "refLists rock! so much functionality for free"
   else
     @tellIrc "ugh...refLists...I need a breather"
