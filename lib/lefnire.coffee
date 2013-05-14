@@ -327,9 +327,9 @@ lefnire::trollIrc = ->
 
   @client.addListener('nick', (oldnick, newnick) =>
     if oldnick is @impersonatorNick # We're in the clear!
-      @ambiguate
+      @ambiguate()
     if newnick is @impersonatorNick
-      @disambiguate
+      @disambiguate()
   )
 
   @client.addListener('join', (channel, nick, message) =>
@@ -360,6 +360,11 @@ lefnire::trollIrc = ->
   )
 
   @client.addListener("part#{@defaultChannel}", (nick, reason, message) =>
+    if nick is @impersonatorNick
+      @ambiguate()
+  )
+
+  @client.addListener("quit", (nick, reason, channels, message) =>
     if nick is @impersonatorNick
       @ambiguate()
   )
