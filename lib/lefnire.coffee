@@ -330,6 +330,8 @@ lefnire::trollIrc = ->
       @ambiguate()
     if newnick is @impersonatorNick
       @disambiguate()
+    if oldnick is @myNick
+      @myNick = newnick
   )
 
   @client.addListener('join', (channel, nick, message) =>
