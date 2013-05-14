@@ -27,6 +27,7 @@ lefnire = ->
     github: 0
     githubEvents: 0
     sentiment: 0
+    refLists: 0
   }
   @speechScoreNormalizer = 0.25
   @github = new GitHubApi {
@@ -124,12 +125,16 @@ lefnire::buildnewfeature = ->
 lefnire::someoneSaidRefLists = ->
   if @maybe (@currentMood / 4)
     @tellIrc "refLists rock! so much functionality for free"
+    @moodFactors.refLists -= 0.1
+    updateMood()
   else
     @tellIrc "ugh...refLists...I need a breather"
-    setTimeout =>
-        @joinMessage = "phew, now I feel better. what's up guys?"
-        @bounce "refLists...why do you hate me so...;("
-      , 2000
+    setTimeout((=>
+      @joinMessage = "phew, now I feel better. what's up guys?"
+      @moodFactors.refLists -= 0.5
+      updateMood()
+      @bounce "refLists...why do you hate me so...;("
+    ), 2000)
 
 lefnire::checkHabitStatus = ->
   @say "Someone wants to know if Habit is down. Let's check..."
