@@ -151,13 +151,13 @@ lefnire::checkHabitStatus = ->
               res.text = JSON.parse(res.text)
 
             if res and res.ok and res.text.status is "up"
-              @tellIrc "guys, looks like prod might be restarting or something, but beta is working great. use that for now."
+              @tellIrc "yeah, I can't get to it either. beta's working though. try that?"
             else
-              @tellIrc "...man, these memory leaks are killing me...both beta and prod...why...refLists...ugh..."
+              @tellIrc "...man, these memory leaks are killing me...both beta and prod...ugh..."
           )
       else if res and res.ok and res.text.status is "up"
         setTimeout =>
-          @tellIrc "don't scare me like that! I thought Habit was down! (it's not. I just checked)"
+          @tellIrc "works for me"
         , 2000
 
       @say "Check complete."
