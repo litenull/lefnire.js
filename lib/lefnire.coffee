@@ -70,8 +70,6 @@ lefnire = ->
       per_page: 100
     }, callback) # (err, res)
   @currentMood = 0
-  @adjustMoodFromCrits()
-  @adjustMoodFromActivity()
 
   # Stores latest IRC messages
   @onMyMind = 0
@@ -276,6 +274,11 @@ lefnire::disambiguate = ->
 lefnire::ambiguate = ->
   @selfRename @defaultNick
 
+lefnire::howAmIFeeling = ->
+  @adjustMoodFromCrits()
+  @adjustMoodFromActivity()
+  @updateMood()
+
 lefnire::theyreTalkingAgain = (text) ->
   @onMyMind++
   @mindTimers.push setTimeout((=>
@@ -316,6 +319,7 @@ lefnire::trollIrc = ->
     console.log("server said: #{messageDump}") if argv.debug
     @myNick = message.args[0]
     @say "My nickname on IRC is #{@myNick}" if argv.debug
+    @howAmIFeeling()
   )
 
   @client.addListener("names#{@defaultChannel}", (nicks) =>
