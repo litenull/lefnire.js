@@ -28,6 +28,7 @@ lefnire = ->
     githubEvents: 0
     sentiment: 0
     refLists: 0
+    habitStatus: 0
   }
   @speechScoreNormalizer = 0.25
   @github = new GitHubApi {
@@ -157,8 +158,12 @@ lefnire::checkHabitStatus = ->
 
             if res and res.ok and res.text.status is "up"
               @tellIrc "yeah, I can't get to it either. beta's working though. try that?"
+              @moodFactors.habitStatus += 0.5
+              @updateMood()
             else
               @tellIrc "...man, these memory leaks are killing me...both beta and prod...ugh..."
+              @moodFactors.habitStatus += 1
+              @updateMood()
           )
       else if res and res.ok and res.text.status is "up"
         setTimeout =>
