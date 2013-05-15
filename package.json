@@ -39,7 +39,7 @@
     "underscore": "~1.4.4",
     "googleapis": "~0.2.8-alpha",
     "speakeasy-nlp": "~0.2.2",
-    "mongoose": "~3.6.10",
+    "mongoose": "~3.6.11",
     "Sentimental": "0.0.2",
     "github": "~0.1.8"
   }
