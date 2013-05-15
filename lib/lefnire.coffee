@@ -279,6 +279,12 @@ lefnire::howAmIFeeling = ->
   @adjustMoodFromActivity()
   @updateMood()
 
+lefnire::theyreTalkingToMe = (text) ->
+  myNickRegex = new RegExp(@myNick)
+  if myNickRegex.test text
+    return true
+  false
+
 lefnire::theyreTalkingAgain = (text) ->
   @onMyMind++
   @mindTimers.push setTimeout((=>
@@ -330,28 +336,29 @@ lefnire::trollIrc = ->
 
   @client.addListener("message#{@defaultChannel}", (nick, text, message) =>
     console.log "message#{@defaultChannel} listener fired" if argv.debug
-    # Special triggers don't affect mood because they return early
-    refListPattern = /reflist/i
-    if refListPattern.test text
-      @someoneSaidRefLists()
-    else if (/how you feeling/i).test text
-      @respond "I'd say about a #{@currentMood}"
-    else if (/.*habit.*down.*/i).test text
+    if @theyreTalkingToMe text
+      refListPattern = /reflist/i
+      if refListPattern.test text
+        @someoneSaidRefLists()
+      else if (/how you feeling/i).test text
+        @respond "I'd say about a #{@currentMood}"
+      else if (/(are you real|so real(|istic))/i).test text
+        @mrConceptThinksIAm nick
+      else if (/backer gear/i).test text
+        @ohYeahBackerGear()
+      else if (/mage/i).test text
+        @mage()
+      else
+        # Store message for potential rage quit
+        console.log "Storing in latest messages" if argv.debug
+        @theyreTalkingAgain text
+
+    if (/.*habit.*down.*/i).test text
       @checkHabitStatus()
     else if (/async/i).test text
       @whoSaidAsync()
     else if (/.*any.*issues.*/i).test text
       @countGitHubIssues()
-    else if (/backer gear/i).test text
-      @ohYeahBackerGear()
-    else if (/(are you real|so real(|istic))/i).test text
-      @mrConceptThinksIAm nick
-    else if (/mage/i).test text
-      @mage()
-    else
-      # Store message for potential rage quit
-      console.log "No messages matched. Storing in latest messages" if argv.debug
-      @theyreTalkingAgain text
 
     if (nick is @moodNick)
       messageScore = understand.analyze text
